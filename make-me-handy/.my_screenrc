@@ -1,0 +1,41 @@
+###################################################################
+# Script Name   : .my_screenrc
+# Script version: 1.01
+# Script date   : 2021-07-24
+# Description   : Get my 'screen' environment handy
+# Usage         : /bin/cat ~/.my_screenrc >> ~/.screenrc; # screen
+# Author        : Toomas Mölder
+# Email         : toomas.molder+makemehandy@gmail.com
+###################################################################
+#
+# To have 'C-a C-a' send an actual 'C-a' ...
+escape ^A^A
+#
+# ... and have 'C-a o' to switch windows
+bind o other
+#
+# Autodetach session on hangup instead of terminating screen completely
+autodetach on
+#
+# Turn off the splash screen
+startup_message off
+#
+# Use a 30000-line scrollback buffer
+defscrollback 30000
+#
+# Enable mouse scrolling and scroll bar history scrolling
+termcapinfo xterm* ti@:te@
+#
+# Turn off visual bell
+# vbell off
+#
+# Control the display of the window captions.
+# Normally a caption is only used if more than one window is shown
+# on the display (split screen mode). But if the type is set to
+# always, screen shows a caption even if only one window is displayed.
+# The default is ‘splitonly’.
+caption always “%{kB}%?%-Lw%?%{bw}%n*%f %t%?(%u)%?%{kB}%?%+Lw%?”
+#
+# Screen will use the type even if the terminal supports a hardstatus line
+# and string displayed
+hardstatus alwayslastline “%{BW}%16=%l %{BW}%50=%d/%m/%Y %{BW}%80=%c%=”

@@ -1,0 +1,99 @@
+###################################################################
+# Script Name   : .my_bash_aliases
+# Script version: 1.10
+# Script date   : 2021-09-02
+# Description   : Get my handy aliases
+# Usage         : /bin/cat ~/.my_bash_aliases >> ~/.bash_aliases; source ~/.bash_aliases
+# Author        : Toomas Mölder
+# Email         : toomas.molder+makemehandy@gmail.com
+###################################################################
+#
+# Additional notes:
+# You may want to put all your additions into a separate file like ~/.bash_aliases
+# Usage from ~/.bashrc
+# if [ -f ~/.bash_aliases ]; then
+#     . ~/.bash_aliases
+# fi
+
+alias a='alias'
+alias af='alias; declare -F'
+alias cc='/usr/bin/clear'
+alias ce='/usr/bin/crontab -e'
+alias cl='/usr/bin/crontab -l'
+alias dfh='/bin/df --human-readable'
+alias duh='/usr/bin/du --human-readable'
+alias dus='/usr/bin/du --summarize --human-readable'
+alias dux='/usr/bin/du --all --human-readable --max-depth=1 "$@" | /usr/bin/sort --human-numeric-sort --reverse'
+alias f='declare -F'
+alias h='history'
+alias hgrep='history | /bin/grep --extended-regexp --ignore-case --color=auto ${1}'
+alias lart='/bin/ls --all -l --reverse -t --color=auto'
+alias less='/bin/less --RAW-CONTROL-CHARS --LINE-NUMBERS --ignore-case'
+alias ll='/bin/ls -l --color=auto'
+alias lrt='/bin/ls -l --reverse -t --color=auto'
+alias reboot='history -a; /usr/bin/sudo reboot now'
+alias rm='/bin/rm --interactive'
+alias rmf='/bin/rm'
+alias s='/usr/bin/screen'
+alias sls='/usr/bin/screen -ls'
+alias srd='/usr/bin/screen -r -d ${1}'
+# Use alias 'sss' instead of 'ss', which is another utility to investigate sockets https://man7.org/linux/man-pages/man8/ss.8.html
+alias sss='/usr/bin/screen -S ${1}'
+# aliases with sudo
+# alias sudo='/usr/bin/sudo sh -c "$@"'
+alias suduh='/usr/bin/sudo /usr/bin/du --human-readable'
+alias sudus='/usr/bin/sudo /usr/bin/du --summarize --human-readable'
+alias sudux='/usr/bin/sudo /usr/bin/du --all --human-readable --max-depth=1 "$@" | sort --human-numeric-sort --reverse'
+alias tf='/usr/bin/tail --follow'
+alias think='read -r -p "Press Ctrl-C to cancel or any key to continue ... " -n1 -s' 
+alias update='/usr/bin/sudo apt-get update; /usr/bin/sudo apt-get dist-upgrade; /usr/bin/sudo apt-get autoremove; read -r -p "Done. Press any key to continue ... " -n1 -s; echo; cat /var/run/reboot-required; cat /var/run/reboot-required.pkgs; read -r -p "Reboot now? Press Ctrl-C to cancel or any key to reboot now ... " -n1 -s; history -a; /usr/bin/sudo reboot now'
+alias update_y='/usr/bin/sudo apt-get --assume-yes update; /usr/bin/sudo apt-get --assume-yes dist-upgrade; /usr/bin/sudo apt-get --assume-yes autoremove; read -r -p "Done. Press any key to continue ... " -n1 -s; echo; cat /var/run/reboot-required; cat /var/run/reboot-required.pkgs; read -r -p "Reboot now? Press Ctrl-C to cancel or any key to reboot now ... " -n1 -s; history -a; /usr/bin/sudo reboot now'
+
+#
+# Service status|stop|start|restart
+#
+# For status it is OK to use all parameters "$@"
+status() { /usr/bin/sudo systemctl --no-pager --full status "$@"; }
+# For others, try to be specific
+stop() { /usr/bin/sudo systemctl stop ${1}.service; }
+start() { /usr/bin/sudo systemctl start ${1}.service; }
+restart() { /usr/bin/sudo systemctl restart ${1}.service; }
+
+#
+# Journalctl
+#
+j() { /usr/bin/sudo journalctl --unit=${1} | /usr/bin/tail --lines=20; }
+jf() { /usr/bin/sudo journalctl --follow --unit=${1}; }
+
+#
+# Convert epoch date into human readable format
+#
+epoch() { /bin/date --date=@$1; }
+
+#
+# Find file from current point in directory tree
+#
+ff() { /usr/bin/find . -printf "%TY-%Tm-%Td\t%s\t%p\n" | /bin/grep --extended-regexp --ignore-case --color=auto ${1}; }
+
+#
+# Find string within files from current point in directory tree
+#
+fsf() {
+        # /usr/bin/find . -type f -print0 | xargs -I {} --null grep ${1} "{}"
+        /usr/bin/find . -iname "*" -type f -print0 | xargs --null grep --with-filename ${1}
+}
+
+#
+# Find string within files from current point up to /
+#
+dnif() {
+    # Recursively list a file from PWD up the directory tree to root
+    [[ -n ${1} ]] || { echo "dnif [ls-opts] name"; return 1; }
+    local THERE=${PWD} RC=2
+    while [[ ${THERE} != / ]]
+        do [[ -e ${THERE}/${2:-$1} ]] && { ls ${2:+$1} ${THERE}/${2:-$1}; RC=0; }
+            THERE=$(dirname ${THERE})
+        done
+    [[ -e ${THERE}/${2:-$1} ]] && { ls ${2:+$1} /${2:-$1}; RC=0; }
+    return ${RC}
+}
