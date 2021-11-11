@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : colours.sh
-# Script version: 1.02
-# Script date   : 2021-07-25
+# Script version: 1.03
+# Script date   : 2021-10-24
 # Description   : Foreground & background colour commands
 # Usage         : source ./colours.sh
 # Author        : Toomas Mölder
@@ -35,8 +35,13 @@ tput smso    # Enter standout (bold) mode
 tput rmso    # Exit standout mode
 '
 
+black=$(tput setaf 0) || true
 red=$(tput setaf 1) || true
 green=$(tput setaf 2) || true
+yellow=$(tput setaf 3) || true
 blue=$(tput setaf 4) || true
+magenta=$(tput setaf 5) || true
+cyan=$(tput setaf 6) || true
+white=$(tput setaf 7) || true
 reset=$(tput sgr0) || true
-export red green blue reset
+export black red green yellow blue magenta cyan white reset
