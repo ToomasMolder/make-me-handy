@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : make_my.sh
-# Script version: 1.51
-# Script date   : 2021-10-12
+# Script version: 1.52
+# Script date   : 2021-11-16
 # Description   : Make my environment handy
 # Args          : <none>
 # Author        : Toomas Mölder
@@ -22,46 +22,46 @@
 ##
 
 function usage() {
-  # [ "$*" ] && /usr/bin/echo "$0: $*"
+  # [ "$*" ] && echo "$0: $*"
   /bin/sed --quiet '/^## /,/^$/s/^## \{0,1\}//p' "$0"
   exit $?
 } 2>/dev/null
 
 function version() {
-  # [ "$*" ] && /usr/bin/echo "$0: Version "
+  # [ "$*" ] && echo "$0: Version "
   SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
   SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
-  /usr/bin/echo "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
+  echo "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
   exit $?
 } 2>/dev/null
 
 function debug() {
-  if [ "${DEBUG}" == "y" ]; then /usr/bin/echo "$@"; fi
+  if [ "${DEBUG}" == "y" ]; then echo "$@"; fi
 } 2>/dev/null
 
 function my_source() {
   if [ "${DEBUG}" == "y" ]; then 
-    /usr/bin/echo "$@"; 
+    echo "$@"; 
   fi
   to_be_sourced="${1}"
   if [ -f "${to_be_sourced}" ]; then
     # https://github.com/koalaman/shellcheck/wiki/SC1090
     # shellcheck source=/dev/null
     source "${to_be_sourced}"; 
-    /usr/bin/echo "${0}: Info: source ${to_be_sourced}"
+    echo "${0}: Info: source ${to_be_sourced}"
   else 
-    /usr/bin/echo "${0}: Warning: file ${to_be_sourced} does not exist. Do nothing."
+    echo "${0}: Warning: file ${to_be_sourced} does not exist. Do nothing."
   fi
 } 2>/dev/null
 
 
 function update() {
   debug "Check parameters and files available"
-  if [ $# -ne 2 ]; then /usr/bin/echo "${0}: Warning: function ${FUNCNAME[0]}() MUST have EXACTLY two parameters, FROM and TO. Do nothing."; return; fi
+  if [ $# -ne 2 ]; then echo "${0}: Warning: function ${FUNCNAME[0]}() MUST have EXACTLY two parameters, FROM and TO. Do nothing."; return; fi
 
   from="${1}"; to="${2}"
 
-  if [ ! -s "${from}" ]; then /usr/bin/echo "${0}: Warning: file ${from} does not exist or is empty. Do nothing."; return; fi
+  if [ ! -s "${from}" ]; then echo "${0}: Warning: file ${from} does not exist or is empty. Do nothing."; return; fi
 
   debug "Get version and date"
   FROM_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
@@ -92,11 +92,11 @@ function update() {
   printf '==> %s' "${to}"
   if [ ! -s "${to}" ]; then
     /bin/cp --preserve "${from}" "${to}";
-    /usr/bin/echo " added to version ${FROM_VERSION} (${FROM_DATE}).";
+    echo " added to version ${FROM_VERSION} (${FROM_DATE}).";
     return;
   fi
-  if (( $(/usr/bin/echo "${FROM_VERSION} <= ${TO_VERSION}" | /usr/bin/bc --mathlib) && $(/usr/bin/echo "$(/bin/date --date="${FROM_DATE} UTC" +%s) <= $(/bin/date --date="${TO_DATE} UTC" +%s)" | /usr/bin/bc --mathlib) )); then
-    /usr/bin/echo " version ${TO_VERSION} (${TO_DATE}) already exists. Did not update."
+  if (( $(echo "${FROM_VERSION} <= ${TO_VERSION}" | /usr/bin/bc --mathlib) && $(echo "$(/bin/date --date="${FROM_DATE} UTC" +%s) <= $(/bin/date --date="${TO_DATE} UTC" +%s)" | /usr/bin/bc --mathlib) )); then
+    echo " version ${TO_VERSION} (${TO_DATE}) already exists. Did not update."
   else
     if [ -s "${to}" ]; then
       debug "Make backup of ${to} into ${to}.bak"
@@ -107,7 +107,7 @@ function update() {
       [ -n "$(tail --quiet --bytes=1 "${to}")" ] && printf '\n' >> "${to}";
     fi
     /bin/cat "${from}" >> "${to}";
-    /usr/bin/echo " updated from version ${TO_VERSION} (${TO_DATE}) to version ${FROM_VERSION} (${FROM_DATE})."
+    echo " updated from version ${TO_VERSION} (${TO_DATE}) to version ${FROM_VERSION} (${FROM_DATE})."
   fi
 }
 
@@ -153,9 +153,9 @@ function main() {
       else
           /bin/cp --preserve "${LOCALREPO}"/.my_htoprc "${HOME}"/.config/htop/htoprc
       fi
-      /usr/bin/echo " color scheme updated."
+      echo " color scheme updated."
     else
-      /usr/bin/echo "${0}: Warning: file ${LOCALREPO}/.my_htoprc does not exist. Do nothing."
+      echo "${0}: Warning: file ${LOCALREPO}/.my_htoprc does not exist. Do nothing."
     fi
   fi
 

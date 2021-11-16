@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : stop_logstash.sh
-# Script version: 1.0
-# Script date   : 2021-10-12
+# Script version: 1.01
+# Script date   : 2021-11-16
 # Description   : Kill Logstash, use before Reboot
 # Author        : Toomas Mölder
 # Email         : toomas.molder+logstash@gmail.com
@@ -15,17 +15,17 @@ user="logstash"
 
 check_stopped () {
     # Waiting for logstash to stop normally
-    /bin/echo -n "Waiting for ${user} to stop"
+    echo -n "Waiting for ${user} to stop"
     # We give logstash 30 seconds to flush data and stop
     for i in {1..11}; do
         if /usr/bin/pgrep --count --uid ${user} | /bin/grep --quiet '0'; then
-            /bin/echo -e "\n${user^} stopped"
+            echo -e "\n${user^} stopped"
             exit 0
         fi
-        /bin/echo -n "."
+        echo -n "."
         /bin/sleep 3
     done
-    /bin/echo ""
+    echo ""
 }
 
 # Stopping logstash without blocking to check when it stoppes (SIGTERM (15) signal from systemd)
