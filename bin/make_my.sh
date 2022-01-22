@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : make_my.sh
-# Script version: 1.52
-# Script date   : 2021-11-16
+# Script version: 1.53
+# Script date   : 2021-12-18
 # Description   : Make my environment handy
 # Args          : <none>
 # Author        : Toomas Mölder
@@ -29,8 +29,9 @@ function usage() {
 
 function version() {
   # [ "$*" ] && echo "$0: Version "
-  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  # Use 'awk -F ' instead of 'awk --field-separator=' for backwards compatibility 
+  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
+  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
   echo "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
   exit $?
 } 2>/dev/null
@@ -64,11 +65,12 @@ function update() {
   if [ ! -s "${from}" ]; then echo "${0}: Warning: file ${from} does not exist or is empty. Do nothing."; return; fi
 
   debug "Get version and date"
-  FROM_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  FROM_DATE=$(/bin/grep --no-messages "^[#\"] Script date *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  # Use 'awk -F ' instead of 'awk --field-separator=' for backwards compatibility 
+  FROM_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
+  FROM_DATE=$(/bin/grep --no-messages "^[#\"] Script date *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
   debug "${from}: version: ${FROM_VERSION} (${FROM_DATE})"
-  TO_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${to}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  TO_DATE=$(/bin/grep --no-messages "^[#\"] Script date *: " "${to}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  TO_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${to}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
+  TO_DATE=$(/bin/grep --no-messages "^[#\"] Script date *: " "${to}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
   debug "${to}: version: ${TO_VERSION} (${TO_DATE})"
 
   debug "Remove all new line, carriage return, tab characters \
@@ -116,8 +118,8 @@ function main() {
   if [ "${XTRACE}" == "y" ]; then set -o xtrace; fi
 
   debug "Check script version and date."
-  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk --field-separator=':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
+  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
   debug "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
 
   if [ "${TEST}" == "y" ]; then
@@ -167,7 +169,8 @@ function main() {
 #
 
 REPO="make-me-handy"
-LOCALREPO="${HOME}"/"${REPO}"
+# Repo was downloaded into "${HOME}"/"${REPO}", .my_ environment is under "${HOME}"/"${REPO}"/"${REPO}"
+LOCALREPO="${HOME}"/"${REPO}"/"${REPO}"
 
 while [ $# -gt 0 ]; do
   case $1 in
