@@ -1,0 +1,51 @@
+###################################################################
+# Script Name   : .my_env
+# Script version: 1.15
+# Script date   : 2022-01-25
+# Description   : My project / environment specifics
+# Args          : <none>
+# Author        : Toomas Mölder
+# Email         : toomas.molder+my_env@gmail.com
+###################################################################
+##
+## Usage: source .my_env
+##
+# General
+host=$(/bin/hostname --short)
+# echo "host: ${host}"
+# export host # does not need to be exported
+#
+# Naming convention of my project hosts is "${project}-${app}-${number}.${host}.${env}.${tld}"
+# If you have smth else, please specify below
+ENV=$(/bin/dnsdomainname | /usr/bin/cut --delimiter='.' --fields=1)
+TLD=$(/bin/dnsdomainname | /bin/sed --expression="s/${ENV}\.//")
+PROJECT=${host%-*}
+# echo "ENV: ${ENV}"
+# echo "TLD: ${TLD}"
+# echo "PROJECT: ${PROJECT}"
+export ENV TLD PROJECT
+
+# Exclude some users to be listed in /usr/bin/last
+# Used in .my_profile
+# EXCLUDE_LAST="root" # Sample
+EXCLUDE_LAST=""
+# echo "EXCLUDE_LAST: ${EXCLUDE_LAST}"
+export EXCLUDE_LAST
+
+#
+# Set PROJECT hosts, used in ~/bin/distribute.sh
+#
+HOSTS="" # Sample
+# HOSTS=("${PROJECT}-build-01.${TLD}" "${PROJECT}-db-01.${TLD}" "${PROJECT}-app-01.${TLD}" "${PROJECT}-www-01.${TLD}" "${PROJECT}-www-02.${TLD}" "${PROJECT}-search-01.${TLD}" "${PROJECT}-feedback-01.${TLD}" "${PROJECT}-logs-01.${TLD}")
+# echo "HOSTS: ${HOSTS}"
+export HOSTS
+
+#
+# Set MY_SERVICES, pipe-delimited list of services I want to check regularly during login or scripts
+# Used in .my_bash_aliases
+#
+MY_SERVICES="" # Sample
+# MY_SERVICES="nginx.service|apache2.service|mariadb.service|elasticsearch.service|logstash.service|kibana.service|php7.4-fpm.service"
+
+# echo "MY_SERVICES: ${MY_SERVICES}"
+export MY_SERVICES

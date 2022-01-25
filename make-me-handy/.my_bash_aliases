@@ -1,8 +1,7 @@
-#!/bin/bash
 ###################################################################
 # Script Name   : .my_bash_aliases
-# Script version: 1.13
-# Script date   : 2022-01-22
+# Script version: 1.18
+# Script date   : 2022-01-25
 # Description   : Get my handy aliases
 # Usage         : /bin/cat ~/.my_bash_aliases >> ~/.bash_aliases; source ~/.bash_aliases
 # Author        : Toomas Mölder
@@ -54,11 +53,29 @@ alias update_y='/usr/bin/sudo apt-get --assume-yes update; /usr/bin/sudo apt-get
 # Service status|stop|start|restart
 #
 # For status it is OK to use all parameters "$@"
-function status() { /usr/bin/sudo systemctl --no-pager --full status "$@"; }
+function status() { /bin/systemctl --no-pager --full status "$@"; }
 # For others, try to be specific
-function stop() { /usr/bin/sudo systemctl stop "${1}".service; }
-function start() { /usr/bin/sudo systemctl start "${1}".service; }
-function restart() { /usr/bin/sudo systemctl restart "${1}".service; }
+function stop() { /usr/bin/sudo /bin/systemctl stop "${1}".service; }
+function start() { /usr/bin/sudo /bin/systemctl start "${1}".service; }
+function restart() { /usr/bin/sudo /bin/systemctl restart "${1}".service; }
+
+# for service in $(/bin/ls /etc/systemd/system/multi-user.target.wants/ | /bin/grep --extended-regexp ${MY_SERVICES}); do /bin/systemctl --no-pager --full status ${service}; read -p "Press Ctrl-C to cancel or any key to continue ... " -n1 -s; echo; done
+function check () {
+  # MY_SERVICES="nginx.service|apache.service|mariadb.service|elasticsearch.service|logstash.service|kibana.service";
+  # shellcheck source=/dev/null
+  source "${HOME}"/.my_env;
+  red=$(/usr/bin/tput setaf 1) || true;
+  reset=$(/usr/bin/tput sgr0) || true;
+  # shellcheck source=/dev/null
+  source "${HOME}"/bin/colours.sh;
+  for service in $(/bin/systemctl --no-pager | /bin/grep --extended-regexp "${MY_SERVICES}" | cut --delimiter=" " --fields=1); do 
+     echo "${red}=== ${service} ===${reset}"; 
+     /bin/systemctl --no-pager --full status "${service}"; 
+     think; 
+     echo; 
+  done; 
+  unset service;
+}
 
 #
 # Journalctl

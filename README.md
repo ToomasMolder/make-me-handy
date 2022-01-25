@@ -44,7 +44,7 @@ mkdir --parents ${HOME}/bin
 ## Make my Ubuntu working environment handy
 
 Make my environment handy, updates environment files 
-- ${HOME}/.profile
+- ${HOME}/.bash_profile
 - ${HOME}/.bashrc
 - ${HOME}/.bash_aliases
 - ${HOME}/.vimrc
@@ -67,7 +67,7 @@ Note! Script includes generation of public/private key pair and distribute publi
 Set up list of environment files to be distributed, sample:
 
 ```bash
-DOTFILES="${HOME}/.profile ${HOME}/.bashrc ${HOME}/.bash_aliases ${HOME}/.vimrc ${HOME}/.screenrc"
+DOTFILES="${HOME}/.bash_profile ${HOME}/.bashrc ${HOME}/.bash_aliases ${HOME}/.vimrc ${HOME}/.screenrc"
 HTOPRC="${HOME}/.config/htop/htoprc"
 ```
 

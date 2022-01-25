@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : .my_profile
-# Script version: 1.37
-# Script date   : 2021-10-24
+# Script version: 1.41
+# Script date   : 2022-01-25
 # Description   : Get my login and profile handy
 # Usage         : /bin/cat ~/.my_profile >> ~/.profile; source ~/.profile
 # Author        : Toomas Mölder
@@ -15,12 +15,12 @@
 
 # Load .my_env to be used some specific environments
 if [ -f "${HOME}"/.my_env ]; then
-  # shellcheck source="${HOME}"/.my_env
+  # shellcheck source=/dev/null
   source "${HOME}"/.my_env
 fi
 
-if [ -z "${exclude_last}" ]; then
-  exclude_last="root"
+if [ -z "${EXCLUDE_LAST}" ]; then
+  EXCLUDE_LAST="root"
 fi
 
 # export a different lighter colour for 'ls'
@@ -34,45 +34,51 @@ export LS_COLORS
 #              https://github.com/altercation/vim-colors-solarized/blob/master/colors/solarized.vim 
 #              https://looselytyped.blogspot.com/2013/02/zenburn-pleasant-color-scheme-for-putty.html
 #
-if [ -f "${HOME}"/bin/colours.sh ]; then
-  # shellcheck source="${HOME}"/bin/colours.sh
+if [ -x "${HOME}"/bin/colours.sh ]; then
+  # shellcheck source=/dev/null
   source "${HOME}"/bin/colours.sh
 else
-  black=$(tput setaf 0) || true
-  red=$(tput setaf 1) || true
-  green=$(tput setaf 2) || true
-  yellow=$(tput setaf 3) || true
-  blue=$(tput setaf 4) || true
-  magenta=$(tput setaf 5) || true
-  cyan=$(tput setaf 6) || true
-  white=$(tput setaf 7) || true
-  reset=$(tput sgr0) || true
+  if [ -x /usr/bin/tput ]; then
+     tput init
+  else
+     echo "WARNING: tput not available"
+  fi
+
+  black=$(/usr/bin/tput setaf 0) || true
+  red=$(/usr/bin/tput setaf 1) || true
+  green=$(/usr/bin/tput setaf 2) || true
+  yellow=$(/usr/bin/tput setaf 3) || true
+  blue=$(/usr/bin/tput setaf 4) || true
+  magenta=$(/usr/bin/tput setaf 5) || true
+  cyan=$(/usr/bin/tput setaf 6) || true
+  white=$(/usr/bin/tput setaf 7) || true
+  reset=$(/usr/bin/tput sgr0) || true
   export black red green yellow blue magenta cyan white reset
 fi
-# 
-# Echo some generic details about host
-/bin/echo "${red}=== HOST ===${reset}"; /bin/echo "$(/bin/hostname --long) [$(/bin/hostname --ip-address)]"
-/bin/echo "${red}=== UPTIME ===${reset}"; /usr/bin/uptime
-/bin/echo "${red}=== LAST ===${reset}"; /usr/bin/last --fulltimes --fullnames --since -30days | /bin/grep --extended-regexp --invert-match "${exclude_last}" | /usr/bin/head --lines 20
-/bin/echo "${red}=== DF ===${reset}"; /bin/df --human-readable
-/bin/echo "${red}=== SCREEN ===${reset}"; /usr/bin/screen -ls
-# read -p "Press Ctrl-C to break or any key to continue with 'htop' ... " -n1 -s; /bin/echo;
+
+# Echo some generic details about current host
+echo "${red}=== HOST ===${reset}"; echo "$(/bin/hostname --long) [$(/bin/hostname --ip-address)]"
+echo "${red}=== UPTIME ===${reset}"; /usr/bin/uptime
+echo "${red}=== LAST ===${reset}"; /usr/bin/last --fulltimes --fullnames --since -30days | /bin/grep --extended-regexp --invert-match "${EXCLUDE_LAST}" | /usr/bin/head --lines=10
+echo "${red}=== DF ===${reset}"; /bin/df --human-readable
+echo "${red}=== SCREEN ===${reset}"; /usr/bin/screen -ls
+# read -p "Press Ctrl-C to break or any key to continue with 'htop' ... " -n1 -s; echo;
 # /usr/bin/htop
 #
-# my_services="mongod|mariadb|monstache|kibana|elasticsearch|apache2"
-# for service in $(sudo /bin/ls /etc/systemd/system/multi-user.target.wants/ | /bin/grep --extended-regexp ${my_services}); do sudo --preserve-env=service /bin/systemctl --no-pager --full status ${service}; read -p "Press Ctrl-C to cancel or any key to continue ... " -n1 -s; /bin/echo; done
-#
 # Logs-specific
-/bin/echo "Some logs-specific variables"
-year=$(/bin/date +%Y); /bin/echo "set year = ${year}"
-# Set today and yesterday as longnum, without delimiter
-yesterday_num="$(/bin/date --date=yesterday '+%Y%m%d')"; /bin/echo "set yesterday_num = ${yesterday_num}"
-today_num=$(/bin/date +%Y%m%d); /bin/echo "set today_num = ${today_num}"
-# Set today and yesterday as directories, with delimiter slash (/)
-yesterday_dir="$(/bin/date --date=yesterday '+%Y/%m/%d')"; /bin/echo "set yesterday_dir = ${yesterday_dir}"
-today_dir=$(/bin/date +%Y/%m/%d); /bin/echo "set today_dir = ${today_dir}"
-# Set today and yesterday with delimiter minus (-)
-yesterday="$(/bin/date --date=yesterday '+%Y-%m-%d')"; /bin/echo "set yesterday = ${yesterday}"
-today=$(/bin/date +%Y-%m-%d); /bin/echo "set today = ${today}"
-# Export logs-specific variables
-export year yesterday_num today_num yesterday_dir today_dir yesterday today
+host=$(/bin/hostname --short)
+if [[ "${host}" == *"logs"* ]]; then
+   echo "Some logs-specific variables"
+   year=$(/bin/date +%Y); echo "set year = ${year}"
+   # Set today and yesterday as longnum, without delimiter
+   yesterday_num="$(/bin/date --date=yesterday '+%Y%m%d')"; echo "set yesterday_num = ${yesterday_num}"
+   today_num=$(/bin/date +%Y%m%d); echo "set today_num = ${today_num}"
+   # Set today and yesterday as directories, with delimiter slash (/)
+   yesterday_dir="$(/bin/date --date=yesterday '+%Y/%m/%d')"; echo "set yesterday_dir = ${yesterday_dir}"
+   today_dir=$(/bin/date +%Y/%m/%d); echo "set today_dir = ${today_dir}"
+   # Set today and yesterday with delimiter minus (-)
+   yesterday="$(/bin/date --date=yesterday '+%Y-%m-%d')"; echo "set yesterday = ${yesterday}"
+   today=$(/bin/date +%Y-%m-%d); echo "set today = ${today}"
+   # Export logs-specific variables
+   export year yesterday_num today_num yesterday_dir today_dir yesterday today
+fi

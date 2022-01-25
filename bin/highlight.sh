@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : highlight.sh
-# Script version: 1.01
-# Script date   : 2021-07-24
+# Script version: 1.02
+# Script date   : 2022-01-25
 # Description   : Highlight text on screen
 # Author        : Toomas Mölder
 # Email         : toomas.molder+highlight@gmail.com
@@ -31,5 +31,5 @@ function highlight() {
 	 
 	fg_c=$(echo -e "\e[1;${fg_color_map[${1}]}m")
 	c_rs=$'\e[0m'
-	sed --unbuffered s"/${2}/${fg_c}\0${c_rs}/g"
+	/bin/sed --unbuffered s"/${2}/${fg_c}\0${c_rs}/g"
 }

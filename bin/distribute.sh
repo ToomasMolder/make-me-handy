@@ -1,65 +1,63 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : distribute.sh
-# Script version: 1.24
-# Script date   : 2021-10-11
+# Script version: 1.25
+# Script date   : 2022-01-25
 # Description   : Distribute my settings and management scripts
 #               : throughout my servers
 # Author        : Toomas Mölder
 # Email         : toomas.molder+distribute@gmail.com
 ###################################################################
 
-# SOURCE=$(eval echo "~")
-SOURCE="${HOME}"
-# echo "SOURCE: ${SOURCE}"
+# source=$(eval echo "~")
+source="${HOME}"
+# echo "source: ${source}"
 
 # We assume the current / running script itself to be distributed as well
-MYSELF="${0}"
-# echo "MYSELF: ${MYSELF}"
+myself="${0}"
+# echo "myself: ${myself}"
 
 # Set up list of files to be distributed
-DOTFILES="${SOURCE}/.profile ${SOURCE}/.bashrc ${SOURCE}/.bash_aliases ${SOURCE}/.vimrc ${SOURCE}/.screenrc"
-# echo "DOTFILES: ${DOTFILES}"
-HTOPRC="${HOME}/.config/htop/htoprc"
-# echo "HTOPRC: ${HTOPRC}"
+dotfiles="${source}/.bash_profile ${source}/.bashrc ${source}/.bash_aliases ${source}/.vimrc ${source}/.screenrc"
+# echo "dotfiles: ${dotfiles}"
+htoprc="${HOME}/.config/htop/htoprc"
+# echo "htoprc: ${htoprc}"
 
 # Set up list of management scripts to be distributed
-BINFILES="${SOURCE}/bin/colours.sh ${SOURCE}/bin/highlight.sh ${SOURCE}/bin/update.sh ${SOURCE}/bin/journal.sh ${SOURCE}/bin/make_my.sh"
-# echo "BINFILES: ${BINFILES}"
+binfiles="${source}/bin/colours.sh ${source}/bin/highlight.sh ${source}/bin/update.sh ${source}/bin/journal.sh ${source}/bin/make_my.sh"
+# echo "binfiles: ${binfiles}"
 
 # Set up space-delimited list of my hosts, short host names, without DNS domain name
 # ENV=""
 # TLD=""
 HOSTS=""
-# Script version: 1.21 Script date   : 2021-04-15
 
 # .my_env to be gitignored ...
-if [ -s "${SOURCE}"/.my_env ]; then
+if [ -s "${source}"/.my_env ]; then
     # shellcheck disable=SC1091
-    # shellcheck source "${SOURCE}"/.my_env
-    source "${SOURCE}"/.my_env
+    source "${source}"/.my_env
 fi
 # echo "ENV: ${ENV}"
 # echo "TLD: ${TLD}"
 if test -z "${HOSTS}"
 then
-    echo "Error: HOSTS is empty. Please fill within ${SOURCE}/.my_env or in script directly"
+    echo "Error: HOSTS is empty. Please fill within ${source}/.my_env or in script directly"
     exit 1
 else
     echo "HOSTS: ${HOSTS}"
 fi
 
 # Current host
-MY_HOST=$(hostname --long)
+my_host=$(hostname --long)
 
-CWD=$(pwd)
+cwd=$(pwd)
 
 # Set up public/private keys to distribute
 id_rsa=false
 
 if [ ! -f "${HOME}/.ssh/id_rsa.pub" ] || [ ! -f "${HOME}/.ssh/id_rsa" ]; then
     # echo "No public/private key pair available, generate ..."
-    ssh-keygen
+    /usr/bin/ssh-keygen
 fi
 
 if [ -f "${HOME}/.ssh/id_rsa.pub" ] && [ -f "${HOME}/.ssh/id_rsa" ]; then
@@ -69,26 +67,27 @@ fi
 
 # Distribute
 for destination in ${HOSTS}; do
-    if [ "${destination}" != "${MY_HOST}" ]; then
+    if [ "${destination}" != "${my_host}" ]; then
         echo "=== ${destination} ==="
         if [ "${id_rsa}" == true ]; then
             # echo "Just in case we try to distribute public key as well"
-            ssh-copy-id "${LOGNAME}"@"${destination}"
+            /usr/bin/ssh-copy-id "${LOGNAME}"@"${destination}"
         else
             # echo "Hmmm, no public/private key pair available. Be prepared to enter your password ..."
             : # no-op
         fi
-        # DOTFILES
-        scp -p "${DOTFILES}" "${destination}":
-        # HTOPRC
-        ssh "${destination}" "mkdir --parents .config/htop/"
+        # dotfiles
+        /usr/bin/scp -p "${dotfiles}" "${destination}":
+        # htoprc
+        /usr/bin/ssh "${destination}" "mkdir --parents .config/htop/"
         # scp -p' Preserves modification times, access times, and modes from the original file.
-        scp -p "${HTOPRC}" "${destination}":.config/htop/
-        # BINFILES
-        ssh "${destination}" "mkdir --parents bin/"
+        /usr/bin/scp -p "${htoprc}" "${destination}":.config/htop/
+        # binfiles
+        /usr/bin/ssh "${destination}" "mkdir --parents bin/"
         # scp -p' Preserves modification times, access times, and modes from the original file.
-        scp -p "${MYSELF}" "${BINFILES}" "${destination}":bin/
+        /usr/bin/scp -p "${myself}" "${binfiles}" "${destination}":bin/
     fi
 done
+unset destination
 
-cd "${CWD}" || exit
+cd "${cwd}" || exit

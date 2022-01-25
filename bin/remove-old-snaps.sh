@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : remove-old-snaps.sh
-# Script version: 1.01
-# Script date   : 2022-01-22
+# Script version: 1.02
+# Script date   : 2022-01-25
 # Description   : Remove old revisions of snaps to free up disk space
 # Prerequisite  : /usr/bin/snap is available, installed
 # Args          : <none>
@@ -30,9 +30,9 @@ function usage() {
 function version() {
   # [ "$*" ] && echo "$0: Version "
   # Use 'awk -F ' instead of 'awk --field-separator=' for backwards compatibility 
-  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
-  echo "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
+  script_version=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
+  script_date=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  echo "${0} version: ${script_version} (${script_date})"
   exit $?
 } 2>/dev/null
 
@@ -56,9 +56,9 @@ function main() {
   # CLOSE ALL SNAPS BEFORE RUNNING THIS
   set -eu
 
-  LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
+  LANG=en_US.UTF-8 /usr/bin/snap list --all | awk '/disabled/{print $1, $3}' |
     while read -r snapname revision; do
-        sudo snap remove "$snapname" --revision="$revision"
+        /usr/bin/sudo /usr/bin/snap remove "${snapname}" --revision="${revision}"
     done
 
   exit $?
@@ -68,8 +68,8 @@ function main() {
 # MAIN
 #
 
-while [ $# -gt 0 ]; do
-  case $1 in
+while [ ${#} -gt 0 ]; do
+  case ${1} in
   (-h|--help) usage 2>&1;;
   (-d|--debug) DEBUG="y"; shift;;
   (-v|--version) version 2>&1;;

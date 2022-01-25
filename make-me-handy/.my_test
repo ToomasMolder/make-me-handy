@@ -1,10 +1,11 @@
 ###################################################################
 # Script Name   : .my_test
-# Script version: 1.01
-# Script date   : 2021-07-24
+# Script version: 1.03
+# Script date   : 2022-01-22
 # Description   : test script
-# Usage         : /bin/cat ~/.my_test >> ~/.test; # test
+# Usage         : /bin/cat ~/.my_test >> ~/.test; # ~/.test
 # Author        : Toomas Mölder
 # Email         : toomas.molder+makemehandy@gmail.com
 ###################################################################
 #
+echo "$(/bin/date): This is ${0}"

@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : update.sh
-# Script version: 1.02
-# Script date   : 2021-07-25
+# Script version: 1.03
+# Script date   : 2022-01-25
 # Description   : Update Ubuntu operating system
 # Author        : Toomas Mölder
 # Email         : toomas.molder+update@gmail.com
@@ -18,7 +18,7 @@ usage() {
     }
 
 parameter=""
-while test $# != 0
+while test ${#} != 0
 do
     case "${1}" in
     -y | --yes | --assume-yes)
@@ -41,11 +41,11 @@ done
 
 declare -i timeout=5
 
-sudo apt-get update ${parameter}
-read -ersp "Press any key or wait ${timeout} seconds to continue... " -n 1 -t ${timeout}; echo
-sudo apt-get dist-upgrade ${parameter}
-read -ersp "Press any key or wait ${timeout} seconds to continue... " -n 1 -t ${timeout}; echo
-sudo apt-get autoremove ${parameter}
+/usr/bin/sudo apt-get update "${parameter}"
+read -ersp "Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
+/usr/bin/sudo apt-get dist-upgrade "${parameter}"
+read -ersp "Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
+/usr/bin/sudo apt-get autoremove "${parameter}"
 read -ersp "Press any key to continue... " -n 1; echo
 test -f /var/run/reboot-required && cat /var/run/reboot-required.pkgs 
-read -ersp "Reboot now? Press Ctrl-C to cancel or any key to reboot now... " -n 1; history -a; sudo reboot now
+read -ersp "Reboot now? Press Ctrl-C to cancel or any key to reboot now... " -n 1; history -a; /usr/bin/sudo reboot now

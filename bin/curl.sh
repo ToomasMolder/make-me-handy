@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : curl.sh
-# Script version: 1.2
-# Script date   : 2021-10-11
+# Script version: 1.3
+# Script date   : 2022-01-25
 # Description   : CURL all sites. Write log into URL-specific log files
 # Usage         : source ./curl.sh
 # Author        : Toomas Mölder
@@ -57,6 +57,7 @@ do
     else
         incorrect_url
     fi
+    unset url
 done
 
 user_agent="${LOGNAME}"@"$(hostname --long)"
@@ -116,6 +117,7 @@ do
     # echo "Header of ${url}: ${header_log}"
     # echo "Log of ${url}: ${url_log}"
 done
+unset url
 
 echo "$(date "+[%F %T]") ===== End of ${0} =====" | tee --append "${LOG}"
 echo "Logfile: ${LOG}" | tee --append "${LOG}"

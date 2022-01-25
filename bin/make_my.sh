@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : make_my.sh
-# Script version: 1.53
-# Script date   : 2021-12-18
+# Script version: 1.54
+# Script date   : 2022-01-25
 # Description   : Make my environment handy
 # Args          : <none>
 # Author        : Toomas Mölder
@@ -125,8 +125,8 @@ function main() {
   if [ "${TEST}" == "y" ]; then
     update "${LOCALREPO}"/.my_test "${HOME}"/.test
   else
-    update "${LOCALREPO}"/.my_profile "${HOME}"/.profile; 
-    # my_source "${HOME}"/.profile
+    update "${LOCALREPO}"/.my_bash_profile "${HOME}"/.bash_profile; 
+    # my_source "${HOME}"/.bash_profile
     update "${LOCALREPO}"/.my_bashrc "${HOME}"/.bashrc; 
     # my_source "${HOME}"/.bashrc
     update "${LOCALREPO}"/.my_bash_aliases "${HOME}"/.bash_aliases; 
@@ -170,7 +170,7 @@ function main() {
 
 REPO="make-me-handy"
 # Repo was downloaded into "${HOME}"/"${REPO}", .my_ environment is under "${HOME}"/"${REPO}"/"${REPO}"
-LOCALREPO="${HOME}"/"${REPO}"/"${REPO}"
+LOCALREPO="${HOME}"/"${REPO}"
 
 while [ $# -gt 0 ]; do
   case $1 in

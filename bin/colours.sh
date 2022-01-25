@@ -1,14 +1,22 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : colours.sh
-# Script version: 1.03
-# Script date   : 2021-10-24
+# Script version: 1.04
+# Script date   : 2022-01-25
 # Description   : Foreground & background colour commands
 # Usage         : source ./colours.sh
 # Author        : Toomas Mölder
 # Email         : toomas.molder+colours@gmail.com
 ###################################################################
 #
+# Initialize the terminal according to the type of terminal in the environmental variable TERM. 
+if [ -x /usr/bin/tput ]; then
+   /usr/bin/tput init
+else
+   echo "WARNING: tput not available"
+   exit
+fi
+
 : '
 Foreground & background colour commands
 tput setab [1-7] # Set the background colour using ANSI escape
@@ -35,13 +43,13 @@ tput smso    # Enter standout (bold) mode
 tput rmso    # Exit standout mode
 '
 
-black=$(tput setaf 0) || true
-red=$(tput setaf 1) || true
-green=$(tput setaf 2) || true
-yellow=$(tput setaf 3) || true
-blue=$(tput setaf 4) || true
-magenta=$(tput setaf 5) || true
-cyan=$(tput setaf 6) || true
-white=$(tput setaf 7) || true
-reset=$(tput sgr0) || true
+black=$(/usr/bin/tput setaf 0) || true
+red=$(/usr/bin/tput setaf 1) || true
+green=$(/usr/bin/tput setaf 2) || true
+yellow=$(/usr/bin/tput setaf 3) || true
+blue=$(/usr/bin/tput setaf 4) || true
+magenta=$(/usr/bin/tput setaf 5) || true
+cyan=$(/usr/bin/tput setaf 6) || true
+white=$(/usr/bin/tput setaf 7) || true
+reset=$(/usr/bin/tput sgr0) || true
 export black red green yellow blue magenta cyan white reset
