@@ -134,6 +134,7 @@ function main() {
     my_source "${HOME}"/.bash_aliases
     update "${LOCALREPO}"/.my_vimrc "${HOME}"/.vimrc
     update "${LOCALREPO}"/.my_screenrc "${HOME}"/.screenrc
+    update "${LOCALREPO}"/.my_env.sample "${HOME}"/.my_env
 
     # update "${LOCALREPO}"/.my_htoprc "${HOME}"/.config/htop/htoprc
     # Beware! This file is rewritten by htop when settings are changed in the interface.
@@ -169,7 +170,7 @@ function main() {
 #
 
 REPO="make-me-handy"
-# Repo was downloaded into "${HOME}"/"${REPO}", .my_ environment is under "${HOME}"/"${REPO}"/"${REPO}"
+# Repo was downloaded into "${HOME}"/"${REPO}", .my_env is under "${HOME}"/"${REPO}"
 LOCALREPO="${HOME}"/"${REPO}"
 
 while [ $# -gt 0 ]; do

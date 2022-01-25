@@ -1,7 +1,7 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : colours.sh
-# Script version: 1.04
+# Script version: 1.05
 # Script date   : 2022-01-25
 # Description   : Foreground & background colour commands
 # Usage         : source ./colours.sh
@@ -11,10 +11,9 @@
 #
 # Initialize the terminal according to the type of terminal in the environmental variable TERM. 
 if [ -x /usr/bin/tput ]; then
-   /usr/bin/tput init
+   : # /usr/bin/tput init
 else
    echo "WARNING: tput not available"
-   exit
 fi
 
 : '
