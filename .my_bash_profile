@@ -1,9 +1,9 @@
 ###################################################################
-# Script Name   : .my_profile
-# Script version: 1.41
+# Script Name   : .my_bash_profile
+# Script version: 1.42
 # Script date   : 2022-01-25
 # Description   : Get my login and profile handy
-# Usage         : /bin/cat ~/.my_profile >> ~/.profile; source ~/.profile
+# Usage         : /bin/cat ~/.my_bash_profile >> ~/.bash_profile; source ~/.bash_profile
 # Author        : Toomas Mölder
 # Email         : toomas.molder+makemehandy@gmail.com
 ###################################################################
@@ -12,6 +12,16 @@
 #  ~/.profile has the stuff NOT specifically related to bash, such as environment variables (PATH and friends)
 #  Anything that should be available to graphical applications OR to sh (or bash invoked as sh) MUST be in ~/.profile
 #  Anything that should be available only to login shells should go in ~/.profile
+#
+# Sequence of scripts sourced upon login
+# 
+# When unning an interactive login shell the things you care about that are sourced when you log in are (and in this order):
+# 1. The SSH daemon, via the pam_motd module of the PAM library, displays the contents of /etc/motd. 
+#    Via the pam_env module, it sets the environment variables from /etc/environment and ~/.pam_environment.
+# 2. A login shell is started, and the following files are read in order:
+#    /etc/profile
+#    /etc/bash.bashrc (the default Ubuntu /etc/profile sources /etc/bash.bashrc).
+#    ~/.bash_profile. The other files that could have been read here (~/.profile and ~/.bash_login) are ignored because ~/.bash_profile exists.
 
 # Load .my_env to be used some specific environments
 if [ -f "${HOME}"/.my_env ]; then
