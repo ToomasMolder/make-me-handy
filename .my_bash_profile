@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : .my_bash_profile
-# Script version: 1.43
-# Script date   : 2022-01-25
+# Script version: 1.44
+# Script date   : 2022-01-28
 # Description   : Get my login and profile handy
 # Usage         : /bin/cat ~/.my_bash_profile >> ~/.bash_profile; source ~/.bash_profile
 # Author        : Toomas Mölder
@@ -9,19 +9,8 @@
 ###################################################################
 #
 # Additional notes:
-#  ~/.profile has the stuff NOT specifically related to bash, such as environment variables (PATH and friends)
-#  Anything that should be available to graphical applications OR to sh (or bash invoked as sh) MUST be in ~/.profile
-#  Anything that should be available only to login shells should go in ~/.profile
-#
-# Sequence of scripts sourced upon login
-# 
-# When unning an interactive login shell the things you care about that are sourced when you log in are (and in this order):
-# 1. The SSH daemon, via the pam_motd module of the PAM library, displays the contents of /etc/motd. 
-#    Via the pam_env module, it sets the environment variables from /etc/environment and ~/.pam_environment.
-# 2. A login shell is started, and the following files are read in order:
-#    /etc/profile
-#    /etc/bash.bashrc (the default Ubuntu /etc/profile sources /etc/bash.bashrc).
-#    ~/.bash_profile. The other files that could have been read here (~/.profile and ~/.bash_login) are ignored because ~/.bash_profile exists.
+# ~/.bash_profile is executed for login shells, while ~/.bashrc is executed for interactive non-login shells.
+# See also: https://www.thegeekstuff.com/2008/10/execution-sequence-for-bash_profile-bashrc-bash_login-profile-and-bash_logout/
 
 # Load .my_env to be used some specific environments
 if [ -f "${HOME}"/.my_env ]; then
@@ -91,4 +80,11 @@ if [[ "${host}" == *"logs"* ]]; then
    today=$(/bin/date +%Y-%m-%d); echo "set today = ${today}"
    # Export logs-specific variables
    export year yesterday_num today_num yesterday_dir today_dir yesterday today
+fi
+
+# I would still love to set my own prompt etc through ~/.bashrc
+# See also https://www.thegeekstuff.com/2008/10/execution-sequence-for-bash_profile-bashrc-bash_login-profile-and-bash_logout/
+if [ -f "${HOME}"/.bashrc ]; then
+  # shellcheck source=/dev/null
+  source "${HOME}"/.bashrc
 fi

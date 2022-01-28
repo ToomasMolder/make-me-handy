@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : .my_bashrc
-# Script version: 1.14
-# Script date   : 2021-10-24
+# Script version: 1.15
+# Script date   : 2022-01-28
 # Description   : Get my bash profile handy
 # Usage         : /bin/cat ~/.my_bashrc >> ~/.bashrc; source ~/.bashrc
 # Author        : Toomas Mölder
@@ -14,7 +14,7 @@
 
 # If not running *i*nteractively, don't do anything
 # [ -z "$PS1" ] && return
-[[ $- == *i* ]] || return 0
+# [[ $- == *i* ]] || return 0
 
 # Naming convention of my hosts (hostname -f) is in form of "${host}.${env}.${tld}"
 # If you have smth else, please specify below
