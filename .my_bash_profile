@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : .my_bash_profile
-# Script version: 1.44
-# Script date   : 2022-01-28
+# Script version: 1.45
+# Script date   : 2022-02-10
 # Description   : Get my login and profile handy
 # Usage         : /bin/cat ~/.my_bash_profile >> ~/.bash_profile; source ~/.bash_profile
 # Author        : Toomas Mölder
@@ -11,6 +11,19 @@
 # Additional notes:
 # ~/.bash_profile is executed for login shells, while ~/.bashrc is executed for interactive non-login shells.
 # See also: https://www.thegeekstuff.com/2008/10/execution-sequence-for-bash_profile-bashrc-bash_login-profile-and-bash_logout/
+
+# I have a function defined that makes script easier
+command_exists () {
+  # You can convert the case of the string more easily by using the new feature of Bash 4.
+  # ‘^’ symbol is used to convert the first character of any string to uppercase and 
+  # ‘^^’ symbol is used to convert the whole string to the uppercase. 
+  # ‘,’ symbol is used to convert the first character of the string to lowercase and 
+  # ‘,,’  symbol is used to convert the whole string to the lowercase.
+  echo "${red}=== ${1^^} ===${reset}"
+  if ! command -v "${1}" &> /dev/null; then
+    echo "WARNING: command '${1}' not available"
+  fi
+}
 
 # Load .my_env to be used some specific environments
 if [ -f "${HOME}"/.my_env ]; then
@@ -33,51 +46,54 @@ export LS_COLORS
 #              https://github.com/altercation/vim-colors-solarized/blob/master/colors/solarized.vim 
 #              https://looselytyped.blogspot.com/2013/02/zenburn-pleasant-color-scheme-for-putty.html
 #
+unset black red green yellow blue magenta cyan white reset
 if [ -x "${HOME}"/bin/colours.sh ]; then
   # shellcheck source=/dev/null
   source "${HOME}"/bin/colours.sh
 else
-  if [ -x /usr/bin/tput ]; then
-     : # /usr/bin/tput init
-  else
-     echo "WARNING: tput not available"
+  if command_exists tput; then
+    : # tput init
+    black=$(tput setaf 0) || true
+    red=$(tput setaf 1) || true
+    green=$(tput setaf 2) || true
+    yellow=$(tput setaf 3) || true
+    blue=$(tput setaf 4) || true
+    magenta=$(tput setaf 5) || true
+    cyan=$(tput setaf 6) || true
+    white=$(tput setaf 7) || true
+    reset=$(tput sgr0) || true
   fi
-
-  black=$(/usr/bin/tput setaf 0) || true
-  red=$(/usr/bin/tput setaf 1) || true
-  green=$(/usr/bin/tput setaf 2) || true
-  yellow=$(/usr/bin/tput setaf 3) || true
-  blue=$(/usr/bin/tput setaf 4) || true
-  magenta=$(/usr/bin/tput setaf 5) || true
-  cyan=$(/usr/bin/tput setaf 6) || true
-  white=$(/usr/bin/tput setaf 7) || true
-  reset=$(/usr/bin/tput sgr0) || true
   export black red green yellow blue magenta cyan white reset
 fi
 
 # Echo some generic details about current host
-echo "${red}=== HOST ===${reset}"; echo "$(/bin/hostname --long) [$(/bin/hostname --ip-address)]"
-echo "${red}=== UPTIME ===${reset}"; /usr/bin/uptime
-echo "${red}=== LAST ===${reset}"; /usr/bin/last --fulltimes --fullnames --since -30days | /bin/grep --extended-regexp --invert-match "${EXCLUDE_LAST}" | /usr/bin/head --lines=10
-echo "${red}=== DF ===${reset}"; /bin/df --human-readable
-echo "${red}=== SCREEN ===${reset}"; /usr/bin/screen -ls
+command_exists hostname && echo "$(hostname --long) [$(hostname --ip-address)]"
+command_exists uptime && uptime
+command_exists last && last --fulltimes --fullnames --since -30days | grep --extended-regexp --invert-match "${EXCLUDE_LAST}" | head --lines=10
+command_exists df && df --human-readable
+command_exists screen && screen -ls
 # read -p "Press Ctrl-C to break or any key to continue with 'htop' ... " -n1 -s; echo;
-# /usr/bin/htop
+# if command -v htop &> /dev/null; then
+#   htop
+# else
+#   echo "WARNING: htop not available"
+# fi
 #
 # Logs-specific
-host=$(/bin/hostname --short)
+unset host
+command_exists hostname && host=$(hostname --short)
 if [[ "${host}" == *"logs"* ]]; then
    echo "Some logs-specific variables"
-   year=$(/bin/date +%Y); echo "set year = ${year}"
+   year=$(date +%Y); echo "set year = ${year}"
    # Set today and yesterday as longnum, without delimiter
-   yesterday_num="$(/bin/date --date=yesterday '+%Y%m%d')"; echo "set yesterday_num = ${yesterday_num}"
-   today_num=$(/bin/date +%Y%m%d); echo "set today_num = ${today_num}"
+   yesterday_num="$(date --date=yesterday '+%Y%m%d')"; echo "set yesterday_num = ${yesterday_num}"
+   today_num=$(date +%Y%m%d); echo "set today_num = ${today_num}"
    # Set today and yesterday as directories, with delimiter slash (/)
-   yesterday_dir="$(/bin/date --date=yesterday '+%Y/%m/%d')"; echo "set yesterday_dir = ${yesterday_dir}"
-   today_dir=$(/bin/date +%Y/%m/%d); echo "set today_dir = ${today_dir}"
+   yesterday_dir="$(date --date=yesterday '+%Y/%m/%d')"; echo "set yesterday_dir = ${yesterday_dir}"
+   today_dir=$(date +%Y/%m/%d); echo "set today_dir = ${today_dir}"
    # Set today and yesterday with delimiter minus (-)
-   yesterday="$(/bin/date --date=yesterday '+%Y-%m-%d')"; echo "set yesterday = ${yesterday}"
-   today=$(/bin/date +%Y-%m-%d); echo "set today = ${today}"
+   yesterday="$(date --date=yesterday '+%Y-%m-%d')"; echo "set yesterday = ${yesterday}"
+   today=$(date +%Y-%m-%d); echo "set today = ${today}"
    # Export logs-specific variables
    export year yesterday_num today_num yesterday_dir today_dir yesterday today
 fi
