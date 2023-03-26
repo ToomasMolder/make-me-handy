@@ -1,3 +1,3 @@
 specifics/
 bin/getService.sh
-.my_env
+.src/.my_env

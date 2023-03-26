@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : update.sh
-# Script version: 1.03
-# Script date   : 2022-01-25
+# Script version: 1.06
+# Script date   : 2023-03-09
 # Description   : Update Ubuntu operating system
 # Author        : Toomas Mölder
 # Email         : toomas.molder+update@gmail.com
@@ -17,8 +17,8 @@ usage() {
     exit 0
     }
 
-parameter=""
-while test ${#} != 0
+unset parameter
+while test "${#}" != 0
 do
     case "${1}" in
     -y | --yes | --assume-yes)
@@ -41,11 +41,25 @@ done
 
 declare -i timeout=5
 
-/usr/bin/sudo apt-get update "${parameter}"
-read -ersp "Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
-/usr/bin/sudo apt-get dist-upgrade "${parameter}"
-read -ersp "Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
-/usr/bin/sudo apt-get autoremove "${parameter}"
-read -ersp "Press any key to continue... " -n 1; echo
-test -f /var/run/reboot-required && cat /var/run/reboot-required.pkgs 
-read -ersp "Reboot now? Press Ctrl-C to cancel or any key to reboot now... " -n 1; history -a; /usr/bin/sudo reboot now
+read -ersp "Going to update Ubuntu operating system. Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
+echo "==> sudo apt-get ${parameter} clean; sudo apt-get ${parameter} autoclean;"
+eval "sudo apt-get ${parameter} clean; sudo apt-get ${parameter} autoclean;"
+
+echo "==> sudo apt-get ${parameter} update"
+eval "sudo apt-get ${parameter} update"
+
+read -ersp "Continue with update? Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
+echo "sudo apt-get ${parameter} dist-upgrade"
+eval "sudo apt-get ${parameter} dist-upgrade"
+
+read -ersp "Continue with cleanup? Press any key or wait ${timeout} seconds to continue... " -n 1 -t "${timeout}"; echo
+echo "==> sudo apt-get ${parameter} autoremove"
+eval "sudo apt-get ${parameter} autoremove"
+echo "sudo apt-get ${parameter} autoremove"
+eval "sudo apt-get ${parameter} autoclean"
+
+echo "Done."
+sudo du --total --human-readable /var/cache/apt/archives/
+
+# read -ersp "End of ${0}. Press any key to continue... " -n 1; echo
+test -f /var/run/reboot-required && cat /var/run/reboot-required.pkgs && (read -ersp "Reboot now? Press Ctrl-C to cancel or any key to reboot now... " -n 1) && (history -a; sudo reboot now)

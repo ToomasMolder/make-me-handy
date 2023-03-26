@@ -1,0 +1,173 @@
+###################################################################
+# Script Name   : .my_bash_aliases
+# Script version: 1.4
+# Script date   : 2023-03-09
+# Description   : Get my handy aliases
+# Usage         : cat ~/.my_bash_aliases >> ~/.bash_aliases; source ~/.bash_aliases
+# Author        : Toomas Mölder
+# Email         : toomas.molder+makemehandy@gmail.com
+###################################################################
+#
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+# Usage from ~/.bashrc (/etc/skel/.bashrc)
+# if [ -f ~/.bash_aliases ]; then
+#     . ~/.bash_aliases
+# fi
+
+# Aliases should be reserved for simple use cases.
+# Functions, you need to remember, are pieces of logic.
+# See also: https://askubuntu.com/questions/163882/alias-vs-function-in-bash-scripts
+# 
+# Get list of all aliases
+# $ alias
+# $ compgen -A alias # compgen is a shell builtin
+# Get list of all functions
+# $ compgen -A function # compgen is a shell builtin
+# 
+# If you want aliases to be inherited to sub-shells, use functions instead. 
+# Those can be exported to the environment (export -f), and sub-shells will then have those functions defined.
+# If you have a bunch of them, then set for export first
+set -a # export the following funcs
+# alias a='alias'
+function a() { alias; }
+alias af='alias; declare -f'
+alias cc='clear'
+alias ce='crontab -e'
+alias cl='crontab -l'
+alias dfh='df --human-readable'
+alias duh='du --human-readable'
+alias dus='du --summarize --human-readable'
+function dux() { du --all --human-readable --max-depth=1 "$@" | sort --human-numeric-sort --reverse; }
+alias f='for function in $(compgen -A function | grep --invert-match "^_" | sort) ; do declare -f ${function}; done'
+alias h='history'
+function hgrep() { history | grep --extended-regexp --ignore-case --color=auto "${1}"; }
+alias lart='ls --all -l --reverse -t --color=auto'
+alias less='/bin/less --RAW-CONTROL-CHARS --LINE-NUMBERS --ignore-case'
+alias ll='ls -l --color=auto'
+alias lrt='ls -l --reverse -t --color=auto'
+alias reboot='history -a; sudo reboot now'
+alias rm='/bin/rm --interactive'
+alias rmf='/bin/rm'
+alias s='screen'
+alias sls='screen -ls'
+function srd() { screen -r -d "${1}"; }
+# Use alias 'sss' instead of 'ss', which is another utility to investigate sockets https://man7.org/linux/man-pages/man8/ss.8.html
+function sss() { screen -S "${1}"; }
+# aliases with sudo
+# alias sudoc='sudo sh -c "$@"'
+alias suduh='sudo du --human-readable'
+alias sudus='sudo du --summarize --human-readable'
+function sudux() { sudo du --all --human-readable --max-depth=1 "$@" | sort --human-numeric-sort --reverse; }
+alias tf='tail --follow'
+
+# alias think='read -r -p "Press Ctrl-C to cancel or any key to continue ... " -n1 -s; echo ""'
+function think() { read -r -p "Press Ctrl-C to cancel or any key to continue ... " -n1 -s; echo ""; }
+
+# alias update='sudo apt-get clean; sudo apt-get autoclean; sudo apt-get update; sudo apt-get dist-upgrade; sudo apt-get autoremove; sudo apt-get autoclean; read -r -p "Done. Press any key to continue ... " -n1 -s; echo; if [ -f "/var/run/reboot-required" ]; then cat /var/run/reboot-required.pkgs; read -r -p "Reboot now? Press Ctrl-C to cancel or any key to reboot now ... " -n1 -s; history -a; sudo reboot now; fi'
+function update() { sudo apt-get clean; sudo apt-get autoclean; sudo apt-get update; sudo apt-get dist-upgrade; sudo apt-get autoremove; sudo apt-get autoclean; read -r -p "Done. Press any key to continue ... " -n1 -s; echo; if [ -f "/var/run/reboot-required" ]; then cat /var/run/reboot-required.pkgs; read -r -p "Reboot now? Press Ctrl-C to cancel or any key to reboot now ... " -n1 -s; history -a; sudo reboot now; fi; }
+
+# alias update_y='sudo apt-get --assume-yes clean; sudo apt-get --assume-yes autoclean; sudo apt-get --assume-yes update; sudo apt-get --assume-yes dist-upgrade; sudo apt-get --assume-yes autoremove; sudo apt-get autoclean; read -r -p "Done. Press any key to continue ... " -n1 -s; echo; if [ -f "/var/run/reboot-required" ]; then cat /var/run/reboot-required.pkgs; read -r -p "Reboot now? Press Ctrl-C to cancel or any key to reboot now ... " -n1 -s; history -a; sudo reboot now; fi'
+function update() { sudo apt-get --assume-yes clean; sudo apt-get --assume-yes autoclean; sudo apt-get --assume-yes update; sudo apt-get --assume-yes dist-upgrade; sudo apt-get --assume-yes autoremove; sudo apt-get autoclean; read -r -p "Done. Press any key to continue ... " -n1 -s; echo; if [ -f "/var/run/reboot-required" ]; then cat /var/run/reboot-required.pkgs; read -r -p "Reboot now? Press Ctrl-C to cancel or any key to reboot now ... " -n1 -s; history -a; sudo reboot now; fi; }
+
+#
+# Service status|stop|start|restart
+#
+# For status it is OK to use all parameters "$@"
+function status() { systemctl --no-pager --full status "$@"; }
+# For others, try to be specific
+function stop() { sudo systemctl stop "${1}".service; }
+function start() { sudo systemctl start "${1}".service; }
+function restart() { sudo systemctl restart "${1}".service; }
+
+function check () {
+  # Load MY_SERVICES from .my_env
+  if [ -r "${HOME}"/.my_env && -f "${HOME}"/.my_env ]; then
+    echo "Source ${HOME}/.my_env from ~/.bash_aliases"
+    # shellcheck source=/dev/null
+    source "${HOME}"/.my_env;
+  else
+    # use some default set
+    MY_SERVICES="nginx.service|apache.service|mariadb.service|elasticsearch.service|logstash.service|kibana.service";
+  fi
+  # Load my colours
+  if [ -r "${HOME}"/bin/colours.sh && -f "${HOME}"/bin/colours.sh ]; then
+    echo "Source ${HOME}/bin/colours.sh from .bash_aliases"
+    # shellcheck source=/dev/null
+    source "${HOME}"/bin/colours.sh;
+  else
+    # use some default set
+    red=$(tput setaf 1) || true;
+    reset=$(tput sgr0) || true;
+  fi
+  for service in $(systemctl --no-pager | grep --extended-regexp "${MY_SERVICES}" | cut --delimiter=" " --fields=1); do 
+     echo "${red}=== ${service} ===${reset}"; 
+     systemctl --no-pager --full status "${service}"; 
+     think; # think is alias set before
+     echo; 
+  done; 
+  unset service;
+}
+
+#
+# Journalctl
+#
+function j() { sudo journalctl --unit="${1}" | tail --lines=20; }
+function jf() { sudo journalctl --follow --unit="${1}"; }
+
+#
+# Convert epoch date into human readable format
+#
+function epoch() { date --date=@"${1}"; }
+
+#
+# Find file from current point in directory tree
+#
+function ff() { find . -printf "%TY-%Tm-%Td\t%s\t%p\n" | grep --extended-regexp --ignore-case --color=auto "${1}"; }
+
+#
+# Another alias to find file from /, ie in full directory tree
+#
+function F() {
+  if [ -z "${1}" ]; then
+    echo "Error: Specify pattern for search";
+  else
+    sudo find / -name "*${1}*" -exec ls --all -l --color=auto --directory {} \;
+   fi;
+}
+
+#
+# Find string within files from current point in directory tree
+#
+function fsf() {
+        # find . -type f -print0 | xargs -I {} --null grep "${1}" "{}"
+        find . -iname "*" -type f -print0 | xargs --null grep --with-filename "${1}"
+}
+
+#
+# Find string within files from current point up to /
+#
+function dnif() {
+    # Recursively list a file from PWD up the directory tree to root
+    [[ -n "${1}" ]] || { echo "dnif [ls-opts] name"; return 1; }
+    local THERE="${PWD}" RC=2
+    while [[ "${THERE}" != "/" ]]
+        do [[ -e "${THERE}"/"${2:-$1}" ]] && { ls "${2:+$1}" "${THERE}"/"${2:-$1}"; RC=0; }
+            THERE=$(dirname "${THERE}")
+        done
+    [[ -e "${THERE}"/"${2:-$1}" ]] && { ls "${2:+$1}" /"${2:-$1}"; RC=0; }
+    return "${RC}"
+}
+
+#
+# Sniff network
+#
+function net () {
+    # myself_IP=$(echo "${SSH_CONNECTION}" | cut --delimiter=" " --fields=1);
+    myself_IP=$(echo "${SSH_CLIENT}" | cut --delimiter=" " --fields=1);
+    myself_name=$(host "${myself_IP}" | cut --delimiter=" " --fields=5 | sed --expression="s/\.$//");
+    sudo tcpdump -i eth0 src "$(hostname --ip-address)" and dst not "${myself_name}" and dst net not 10.0.0.0/8 and port not 22
+}
+set +a # stop exporting

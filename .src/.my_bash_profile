@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : .my_bash_profile
-# Script version: 1.45
-# Script date   : 2022-02-10
+# Script version: 1.49
+# Script date   : 2022-04-27
 # Description   : Get my login and profile handy
 # Usage         : /bin/cat ~/.my_bash_profile >> ~/.bash_profile; source ~/.bash_profile
 # Author        : Toomas Mölder
@@ -9,33 +9,48 @@
 ###################################################################
 #
 # Additional notes:
+# Modifications to PATH and LD_LIBRARY_PATH go in ~/.bash_profile
 # ~/.bash_profile is executed for login shells, while ~/.bashrc is executed for interactive non-login shells.
 # See also: https://www.thegeekstuff.com/2008/10/execution-sequence-for-bash_profile-bashrc-bash_login-profile-and-bash_logout/
 
 # I have a function defined that makes script easier
 command_exists () {
   # You can convert the case of the string more easily by using the new feature of Bash 4.
-  # ‘^’ symbol is used to convert the first character of any string to uppercase and 
-  # ‘^^’ symbol is used to convert the whole string to the uppercase. 
-  # ‘,’ symbol is used to convert the first character of the string to lowercase and 
-  # ‘,,’  symbol is used to convert the whole string to the lowercase.
+  # "^" symbol is used to convert the first character of any string to uppercase and 
+  # "^^" symbol is used to convert the whole string to the uppercase.
+  # "," symbol is used to convert the first character of the string to lowercase and 
+  # ",,"  symbol is used to convert the whole string to the lowercase.
   echo "${red}=== ${1^^} ===${reset}"
   if ! command -v "${1}" &> /dev/null; then
     echo "WARNING: command '${1}' not available"
   fi
 }
 
+# I have a function defined that makes script easier
+file_exists () {
+  # You can convert the case of the string more easily by using the new feature of Bash 4.
+  # "^" symbol is used to convert the first character of any string to uppercase and 
+  # "^^" symbol is used to convert the whole string to the uppercase.
+  # "," symbol is used to convert the first character of the string to lowercase and 
+  # ",,"  symbol is used to convert the whole string to the lowercase.
+  echo "${red}=== ${1^^} ===${reset}"
+  if [ ! -f "${1}" ] &> /dev/null; then
+    echo "WARNING: file '${1}' does not exist"
+  fi
+}
+
 # Load .my_env to be used some specific environments
-if [ -f "${HOME}"/.my_env ]; then
+if [ -r "${HOME}"/.my_env ] && [ -f "${HOME}"/.my_env ]; then
+  # echo "Source ${HOME}/.my_env from ~/.bash_profile"
   # shellcheck source=/dev/null
   source "${HOME}"/.my_env
 fi
 
-if [ -z "${EXCLUDE_LAST}" ]; then
-  EXCLUDE_LAST="root"
-fi
-
-# export a different lighter colour for 'ls'
+# Export a different lighter colour for 'ls'
+# See also: https://linuxhint.com/ls_colors_bash/
+# You might start from command:
+# $ dircolors -b >> .bashrc
+#
 LS_COLORS='rs=0:di=1;35:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:';
 export LS_COLORS
 
@@ -46,31 +61,28 @@ export LS_COLORS
 #              https://github.com/altercation/vim-colors-solarized/blob/master/colors/solarized.vim 
 #              https://looselytyped.blogspot.com/2013/02/zenburn-pleasant-color-scheme-for-putty.html
 #
-unset black red green yellow blue magenta cyan white reset
 if [ -x "${HOME}"/bin/colours.sh ]; then
+  # echo "Source ${HOME}/bin/colours.sh from ~/.bash_profile"
   # shellcheck source=/dev/null
   source "${HOME}"/bin/colours.sh
-else
-  if command_exists tput; then
-    : # tput init
-    black=$(tput setaf 0) || true
-    red=$(tput setaf 1) || true
-    green=$(tput setaf 2) || true
-    yellow=$(tput setaf 3) || true
-    blue=$(tput setaf 4) || true
-    magenta=$(tput setaf 5) || true
-    cyan=$(tput setaf 6) || true
-    white=$(tput setaf 7) || true
-    reset=$(tput sgr0) || true
-  fi
-  export black red green yellow blue magenta cyan white reset
+fi
+
+# Check existence of EXCLUDE_FROM_LAST and if not, then set as root
+if [ -z "${EXCLUDE_FROM_LAST}" ]; then
+  EXCLUDE_FROM_LAST="root"
 fi
 
 # Echo some generic details about current host
 command_exists hostname && echo "$(hostname --long) [$(hostname --ip-address)]"
+# Several options to find the number of cores in Ubuntu
+# command_exists lscpu && lscpu | grep --extended-regexp "^CPU\(s\):"
+# file_exists /proc/cpuinfo && echo -e "CPU(s):\t$(cat /proc/cpuinfo | grep "^processor" | wc --lines)"
+command_exists nproc && echo -e "CPU(s):\t$(nproc)"
 command_exists uptime && uptime
-command_exists last && last --fulltimes --fullnames --since -30days | grep --extended-regexp --invert-match "${EXCLUDE_LAST}" | head --lines=10
+command_exists last && last --fulltimes --fullnames --since -30days | grep --extended-regexp --invert-match "${EXCLUDE_FROM_LAST}" | head --lines=10
+command_exists ~/bin/jdf.sh && ~/bin/jdf.sh
 command_exists df && df --human-readable
+command_exists free && free --human --lohi --total
 command_exists screen && screen -ls
 # read -p "Press Ctrl-C to break or any key to continue with 'htop' ... " -n1 -s; echo;
 # if command -v htop &> /dev/null; then
@@ -78,12 +90,18 @@ command_exists screen && screen -ls
 # else
 #   echo "WARNING: htop not available"
 # fi
+
+# One of my project hosts is for collecting logs from all other hosts
+# Specifics for host containing name 'logs'
+# HOST is set in .my_env
 #
-# Logs-specific
-unset host
-command_exists hostname && host=$(hostname --short)
-if [[ "${host}" == *"logs"* ]]; then
-   echo "Some logs-specific variables"
+# Just in case, we might set it also here
+unset HOST
+if command -v hostname &> /dev/null; then
+  HOST=$(hostname --short)
+fi
+if [[ "${HOST}" == *"logs"* ]]; then
+   echo "Some logs-host-specific variables"
    year=$(date +%Y); echo "set year = ${year}"
    # Set today and yesterday as longnum, without delimiter
    yesterday_num="$(date --date=yesterday '+%Y%m%d')"; echo "set yesterday_num = ${yesterday_num}"
@@ -98,9 +116,11 @@ if [[ "${host}" == *"logs"* ]]; then
    export year yesterday_num today_num yesterday_dir today_dir yesterday today
 fi
 
-# I would still love to set my own prompt etc through ~/.bashrc
-# See also https://www.thegeekstuff.com/2008/10/execution-sequence-for-bash_profile-bashrc-bash_login-profile-and-bash_logout/
-if [ -f "${HOME}"/.bashrc ]; then
+# I would still love to set my own functions and aliases from ~/.bashrc
+# This statement has the effect of ensuring that ~/.bashrc will be loaded in all interactive shells 
+# (except those launched with special options intended to prevent such loading), instead of only in non-login shells.
+if [ -r "${HOME}"/.bashrc ] && [ -f "${HOME}"/.bashrc ]; then
+  # echo "Source ${HOME}/.bashrc from ~/.bash_profile"
   # shellcheck source=/dev/null
   source "${HOME}"/.bashrc
 fi

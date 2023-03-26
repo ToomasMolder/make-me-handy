@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : make_my.sh
-# Script version: 1.54
-# Script date   : 2022-01-25
+# Script version: 1.62
+# Script date   : 2023-03-08
 # Description   : Make my environment handy
 # Args          : <none>
 # Author        : Toomas Mölder
@@ -21,35 +21,58 @@
 ##                 before they are executed
 ##
 
+# Prints usage based on comment lines starting with '## ' in current script
 function usage() {
   # [ "$*" ] && echo "$0: $*"
-  /bin/sed --quiet '/^## /,/^$/s/^## \{0,1\}//p' "$0"
+  sed --quiet '/^## /,/^$/s/^## \{0,1\}//p' "$0"
   exit $?
 } 2>/dev/null
 
+# Checks command exists
+function check_exists() {
+  if ! command -v "${1}" &> /dev/null; then
+    echo "Command ${1} could not be found. Please install it first."
+	echo "$ sudo apt update && sudo apt upgrade"
+    echo "$ sudo apt install ${1}	# Debian/Ubuntu"
+    echo "$ sudo yum install ${1}	# RHEL/CentOS"
+    echo "$ sudo dnf install ${1}	# Fedora 22+"
+    exit
+  fi
+}
+
+# Calculates version and date of script based on header of current script
 function version() {
   # [ "$*" ] && echo "$0: Version "
   # Use 'awk -F ' instead of 'awk --field-separator=' for backwards compatibility 
-  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  SCRIPT_VERSION=$(grep --no-messages "^# Script version *: " "${0}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//' | bc --mathlib)
+  SCRIPT_DATE=$(grep --no-messages "^# Script date *: " "${0}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//')
   echo "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
   exit $?
 } 2>/dev/null
 
+# If DEBUG=y, then echo command
 function debug() {
   if [ "${DEBUG}" == "y" ]; then echo "$@"; fi
 } 2>/dev/null
 
+# Touch and save command history
+# Avoid error -bash: fc: history specification out of range
+function history_touch()	{
+  touch ~/.bash_history
+  history -a
+} 2>/dev/null
+
+# Source if exists
 function my_source() {
   if [ "${DEBUG}" == "y" ]; then 
     echo "$@"; 
   fi
   to_be_sourced="${1}"
   if [ -f "${to_be_sourced}" ]; then
+    echo "${0}: Info: source ${to_be_sourced}"
     # https://github.com/koalaman/shellcheck/wiki/SC1090
     # shellcheck source=/dev/null
     source "${to_be_sourced}"; 
-    echo "${0}: Info: source ${to_be_sourced}"
   else 
     echo "${0}: Warning: file ${to_be_sourced} does not exist. Do nothing."
   fi
@@ -66,11 +89,11 @@ function update() {
 
   debug "Get version and date"
   # Use 'awk -F ' instead of 'awk --field-separator=' for backwards compatibility 
-  FROM_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  FROM_DATE=$(/bin/grep --no-messages "^[#\"] Script date *: " "${from}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  FROM_VERSION=$(grep --extended-regexp --no-messages "^[#\"] Script version *: " "${from}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//' | bc --mathlib)
+  FROM_DATE=$(grep --no-messages "^[#\"] Script date *: " "${from}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//')
   debug "${from}: version: ${FROM_VERSION} (${FROM_DATE})"
-  TO_VERSION=$(/bin/grep --extended-regexp --no-messages "^[#\"] Script version *: " "${to}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  TO_DATE=$(/bin/grep --no-messages "^[#\"] Script date *: " "${to}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  TO_VERSION=$(grep --extended-regexp --no-messages "^[#\"] Script version *: " "${to}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//' | bc --mathlib)
+  TO_DATE=$(grep --no-messages "^[#\"] Script date *: " "${to}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//')
   debug "${to}: version: ${TO_VERSION} (${TO_DATE})"
 
   debug "Remove all new line, carriage return, tab characters \
@@ -93,33 +116,44 @@ function update() {
   debug "Make update happen only when newest version is not yet present."
   printf '==> %s' "${to}"
   if [ ! -s "${to}" ]; then
-    /bin/cp --preserve "${from}" "${to}";
+    cp --preserve "${from}" "${to}";
     echo " added to version ${FROM_VERSION} (${FROM_DATE}).";
     return;
   fi
-  if (( $(echo "${FROM_VERSION} <= ${TO_VERSION}" | /usr/bin/bc --mathlib) && $(echo "$(/bin/date --date="${FROM_DATE} UTC" +%s) <= $(/bin/date --date="${TO_DATE} UTC" +%s)" | /usr/bin/bc --mathlib) )); then
+  if (( $(echo "${FROM_VERSION} <= ${TO_VERSION}" | bc --mathlib) && $(echo "$(date --date="${FROM_DATE} UTC" +%s) <= $(date --date="${TO_DATE} UTC" +%s)" | bc --mathlib) )); then
     echo " version ${TO_VERSION} (${TO_DATE}) already exists. Did not update."
   else
     if [ -s "${to}" ]; then
       debug "Make backup of ${to} into ${to}.bak"
-      /bin/cp --preserve "${to}" "${to}".bak;
+      cp --preserve "${to}" "${to}".bak;
       debug "Remove previous version from ${to} if exists, to avoid duplicate handys ..."
-      /bin/sed --in-place '/^###################################################################$/,$d' "${to}"
+      sed --in-place '/^###################################################################$/,$d' "${to}"
       debug "Add newline to the end of ${to} if not present yet to avoid script errors."
       [ -n "$(tail --quiet --bytes=1 "${to}")" ] && printf '\n' >> "${to}";
     fi
-    /bin/cat "${from}" >> "${to}";
+    cat "${from}" >> "${to}";
     echo " updated from version ${TO_VERSION} (${TO_DATE}) to version ${FROM_VERSION} (${FROM_DATE})."
   fi
 }
 
+# main function
 function main() {
   debug "Check xtrace."
   if [ "${XTRACE}" == "y" ]; then set -o xtrace; fi
 
+  history_touch
+  
+  check_exists grep
+  check_exists tail
+  check_exists awk
+  check_exists sed
+  check_exists bc
+  check_exists mkdir
+  check_exists cp
+
   debug "Check script version and date."
-  SCRIPT_VERSION=$(/bin/grep --no-messages "^# Script version *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//' | /usr/bin/bc --mathlib)
-  SCRIPT_DATE=$(/bin/grep --no-messages "^# Script date *: " "${0}" | /usr/bin/tail --lines 1 | /usr/bin/awk -F ':' '{print $2}' | /usr/bin/awk '{print $1}' | /bin/sed --expression='s/^[[:space:]]*//')
+  SCRIPT_VERSION=$(grep --no-messages "^# Script version *: " "${0}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//' | bc --mathlib)
+  SCRIPT_DATE=$(grep --no-messages "^# Script date *: " "${0}" | tail --lines 1 | awk -F ':' '{print $2}' | awk '{print $1}' | sed --expression='s/^[[:space:]]*//')
   debug "${0} version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
 
   if [ "${TEST}" == "y" ]; then
@@ -130,8 +164,11 @@ function main() {
     update "${LOCALREPO}"/.my_bashrc "${HOME}"/.bashrc; 
     # my_source "${HOME}"/.bashrc
     update "${LOCALREPO}"/.my_bash_aliases "${HOME}"/.bash_aliases; 
-    shopt -s expand_aliases
-    my_source "${HOME}"/.bash_aliases
+    # echo "${0}: Info: aliases sourced will be NOT available until sourced manually"
+	# Aliases aren't available on the same line or in the same function where they are defined
+	# For almost every purpose, shell functions are preferred over aliases.
+    # bash -c $'shopt -s expand_aliases;'
+    # my_source "${HOME}"/.bash_aliases
     update "${LOCALREPO}"/.my_vimrc "${HOME}"/.vimrc
     update "${LOCALREPO}"/.my_screenrc "${HOME}"/.screenrc
     update "${LOCALREPO}"/.my_env.sample "${HOME}"/.my_env
@@ -150,15 +187,19 @@ function main() {
     # I like Broken Gray, ie color_scheme=6
     if [ -f "${LOCALREPO}"/.my_htoprc ]; then
       printf '==> %s' "${HOME}"/.config/htop/htoprc
-      /bin/mkdir --parents "${HOME}"/.config/htop
+      mkdir --parents "${HOME}"/.config/htop
       if [ -f "${HOME}"/.config/htop/htoprc ]; then
-          /bin/sed --in-place=.bak --expression='s/^color_scheme=.*$/color_scheme=6/' "${HOME}"/.config/htop/htoprc
+          sed --in-place=.bak --expression='s/^color_scheme=.*$/color_scheme=6/' "${HOME}"/.config/htop/htoprc
       else
-          /bin/cp --preserve "${LOCALREPO}"/.my_htoprc "${HOME}"/.config/htop/htoprc
+          cp --preserve "${LOCALREPO}"/.my_htoprc "${HOME}"/.config/htop/htoprc
       fi
       echo " color scheme updated."
     else
       echo "${0}: Warning: file ${LOCALREPO}/.my_htoprc does not exist. Do nothing."
+    fi
+	# Set my ssh
+	if [ -x "${HOME}"/bin/distribute_my_id.sh ]; then
+	  source "${HOME}"/bin/distribute_my_id.sh
     fi
   fi
 
@@ -170,8 +211,9 @@ function main() {
 #
 
 REPO="make-me-handy"
-# Repo was downloaded into "${HOME}"/"${REPO}", .my_env is under "${HOME}"/"${REPO}"
-LOCALREPO="${HOME}"/"${REPO}"
+# Repo was downloaded into "${HOME}"/"${REPO}"
+# LOCALREPO="${HOME}/${REPO}/.src"
+LOCALREPO="${HOME}/.src"
 
 while [ $# -gt 0 ]; do
   case $1 in

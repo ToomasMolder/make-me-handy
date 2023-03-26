@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################################
 # Script Name   : colours.sh
-# Script version: 1.06
-# Script date   : 2022-02-10
+# Script version: 1.07
+# Script date   : 2022-02-12
 # Description   : Foreground & background colour commands
 # Usage         : source ./colours.sh
 # Author        : Toomas Mölder
@@ -18,11 +18,23 @@ else
 fi
 
 : '
-Foreground & background colour commands
-tput setab [1-7] # Set the background colour using ANSI escape
-tput setaf [1-7] # Set the foreground colour using ANSI escape
-Colours are as follows:
+# tput Color Capabilities:
+tput setab [1-7]    # Set the background colour using ANSI escape
+tput setb [1-7]     # Set a background color
+tput setaf [1-7]    # Set the foreground colour using ANSI escape
+tput setf [1-7]     # Set a foreground color
 
+# tput Text Mode Capabilities:
+tput bold           # Set bold mode
+tput dim            # turn on half-bright mode
+tput smul           # begin underline mode
+tput rmul           # exit underline mode
+tput rev            # Turn on reverse mode
+tput smso           # Enter standout mode (bold on rxvt)
+tput rmso           # Exit standout mode
+tput sgr0           # Turn off all attributes
+
+# Colours are as follows:
 Num  Colour    #define         R G B
 0    black     COLOR_BLACK     0,0,0
 1    red       COLOR_RED       1,0,0
@@ -33,7 +45,7 @@ Num  Colour    #define         R G B
 6    cyan      COLOR_CYAN      0,1,1
 7    white     COLOR_WHITE     1,1,1
 
-Text mode commands
+# Text mode commands
 tput bold    # Select bold mode
 tput dim     # Select dim (half-bright) mode
 tput smul    # Enable underline mode

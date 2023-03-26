@@ -1,7 +1,7 @@
 ###################################################################
 # Script Name   : .my_env
-# Script version: 1.15
-# Script date   : 2022-01-25
+# Script version: 100.17
+# Script date   : 2022-02-12
 # Description   : My project / environment specifics
 # Args          : <none>
 # Author        : Toomas Mölder
@@ -10,27 +10,38 @@
 ##
 ## Usage: source .my_env
 ##
-# General
-host=$(/bin/hostname --short)
-# echo "host: ${host}"
-# export host # does not need to be exported
 #
-# Naming convention of my project hosts is "${project}-${app}-${number}.${host}.${env}.${tld}"
-# If you have smth else, please specify below
-ENV=$(/bin/dnsdomainname | /usr/bin/cut --delimiter='.' --fields=1)
-TLD=$(/bin/dnsdomainname | /bin/sed --expression="s/${ENV}\.//")
-PROJECT=${host%-*}
-# echo "ENV: ${ENV}"
-# echo "TLD: ${TLD}"
-# echo "PROJECT: ${PROJECT}"
-export ENV TLD PROJECT
+# General
+# Used in .my_bash_profile
+if command -v hostname &> /dev/null; then
+  unset HOST
+  HOST=$(hostname --short)
+  # echo "HOST: ${HOST}"
+  export HOST
+else
+  echo "WARNING: command 'hostname' not available" 
+fi
 
-# Exclude some users to be listed in /usr/bin/last
-# Used in .my_profile
-# EXCLUDE_LAST="root" # Sample
-EXCLUDE_LAST=""
-# echo "EXCLUDE_LAST: ${EXCLUDE_LAST}"
-export EXCLUDE_LAST
+# Naming convention of my project hosts is "${PROJECT}-${APP}-${NUMBER}.${HOST}.${ENV}.${TLD}"
+# If you have smth else, please specify below
+unset ENV TLD PROJECT
+if command -v dnsdomainname &> /dev/null; then
+  ENV=$(dnsdomainname | /usr/bin/cut --delimiter="." --fields=1)
+  TLD=$(dnsdomainname | /bin/sed --expression="s/${ENV}\.//")
+  PROJECT=${HOST%-*}
+  # echo "ENV: ${ENV}"
+  # echo "TLD: ${TLD}"
+  # echo "PROJECT: ${PROJECT}"
+  export ENV TLD PROJECT
+else
+  echo "WARNING: command 'dnsdomainname' not available" 
+fi
+
+# Exclude some users to be listed in 'last'
+# EXCLUDE_FROM_LAST="root" # Sample
+EXCLUDE_FROM_LAST=""
+# echo "EXCLUDE_FROM_LAST: ${EXCLUDE_FROM_LAST}"
+export EXCLUDE_FROM_LAST
 
 #
 # Set PROJECT hosts, used in ~/bin/distribute.sh
