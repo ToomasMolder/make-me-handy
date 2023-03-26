@@ -11,13 +11,13 @@
 # Similar approach using Ansible
 : <<'END'
 ---
-- name: Replace apt.tt.kit with repo.riaint.ee 
+- name: Replace xxx with yyy 
   hosts: all
   gather_facts: false
   vars:
     not_need_files:
-      - /etc/apt/sources.list.d/ria.list
-      - /etc/apt/sources.list.d/salt.list
+      - /etc/apt/sources.list.d/zz1.list
+      - /etc/apt/sources.list.d/zz2.list
   tasks:
     - name: Find all APT source files
       ansible.builtin.find:
@@ -26,11 +26,11 @@
           - '*.list'
       register: source_files
 
-    - name: Replace apt.tt.kit with repo.riaint.ee
+    - name: Replace xxx with yyy
       ansible.builtin.replace:
         path: "{{ item.path }}"
-        regexp: 'http://apt.tt.kit'
-        replace: 'https://repo.riaint.ee'
+        regexp: 'xxx'
+        replace: 'yyy'
       with_items: "{{ source_files.files }}"
 
     - name: Remove not needed APT source files
@@ -42,8 +42,8 @@
 END
 
 # mkdir --parents ~/_etc_apt_sources_list_d; 
-find_this="http://apt.tt.kit"; 
-replace_with="https://repo.riaint.ee"; 
+find_this="xxx"; 
+replace_with="yyy"; 
 
 tmp_file="${TMPDIR:-/tmp}/replace_tmp_file.$$";
 source_dir="/etc/apt/sources.list.d"
@@ -52,7 +52,7 @@ backup_dir="./_etc_apt_sources_list_d"
 echo "=== Current ${source_dir}/*.list ==="
 ls --all -l --reverse --time=ctime "${source_dir}"/*.list
 
-# :1,$s#http://apt.tt.kit#https://repo.riaint.ee#
+# :1,$s#xxx#yyy#
 for file in $(grep --dereference-recursive "${find_this}" "${source_dir}" | \
   cut --delimiter=':' --fields=1 | \
   grep "\.list$" | sort | uniq);
@@ -67,29 +67,29 @@ do
 done; 
 
 # Cleanup specifics
-f1="/etc/apt/sources.list.d/apt_tt_kit_ubuntu_ppa_ondrej_php.list"
-f2="/etc/apt/sources.list.d/repo_riaint_ee_ubuntu_ppa_ondrej_php.list"
+f1="/etc/apt/sources.list.d/zz1.list"
+f2="/etc/apt/sources.list.d/zz2.list"
 # echo "Cleanup1 ${f1}"
 if test -f "${f1}" && ! test -f "${f2}"; then echo "=== mv ${f1} ${f2} ==="; sudo mv --interactive "${f1}" "${f2}"; fi
 # echo "Cleanup2 ${f1}"
 if test -f "${f1}" && test -f "${f2}"; then echo "=== cat ${f1} ==="; cat "${f1}"; echo "=== cat ${f2} ==="; cat "${f2}"; echo "=== DIFF ==="; diff "${f1}" "${f2}"; sudo rm --interactive "${f1}"; fi
 
-f1="/etc/apt/sources.list.d/elk7.list"
-f2="/etc/apt/sources.list.d/elk8.list"
+f1="/etc/apt/sources.list.d/zz7.list"
+f2="/etc/apt/sources.list.d/zz8.list"
 # echo "Cleanup ${f1}"
 if test -f "${f1}" && test -f "${f2}"; then echo "=== cat ${f1} ==="; cat "${f1}"; echo "=== cat ${f2} ==="; cat "${f2}"; echo "=== DIFF ==="; diff "${f1}" "${f2}"; sudo rm --interactive "${f1}"; fi
 
-f1="/etc/apt/sources.list.d/ria-zabbix.list"
-f2="/etc/apt/sources.list.d/zabbix.list"
+f1="/etc/apt/sources.list.d/zz3.list"
+f2="/etc/apt/sources.list.d/zz4.list"
 # echo "Cleanup ${f1}"
 if test -f "${f1}" && test -f "${f2}"; then echo "=== cat ${f1} ==="; cat "${f1}"; echo "=== cat ${f2} ==="; cat "${f2}"; echo "=== DIFF ==="; diff "${f1}" "${f2}"; sudo rm --interactive "${f1}"; fi
 
-f1="/etc/apt/sources.list.d/salt.list"
+f1="/etc/apt/sources.list.d/zz5.list"
 f2="${backup_dir}"/"$(basename -- ${f1})".save
 # echo "Cleanup ${f1} to ${f2}"
 if test -f "${f1}"; then sudo mv --interactive "${f1}" "${f2}"; fi
 
-f1="/etc/apt/sources.list.d/ria.list"
+f1="/etc/apt/sources.list.d/zz6.list"
 f2="${backup_dir}"/"$(basename -- ${f1})".save
 # echo "Cleanup ${f1} to ${f2}"
 if test -f "${f1}"; then sudo mv --interactive "${f1}" "${f2}"; fi
